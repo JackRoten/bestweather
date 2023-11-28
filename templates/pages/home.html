@@ -2,4 +2,7 @@
 
 {% block content %}
   <h1>Helllloooooo!</h1>
+  <h2>Weather Forecast for {{ weather_data.city }}</h2>
+  <p>Temperature: {{ weather_data.temperature }}°C</p>
+  <p>Conditions: {{ weather_data.conditions }}</p>
 {% endblock content %}

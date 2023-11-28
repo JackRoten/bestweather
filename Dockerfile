@@ -45,7 +45,8 @@ RUN adduser \
 # into this layer.
 
 RUN pip install --upgrade pip setuptools poetry
-RUN poetry config virtualenvs.in-project true && poetry install --only main
+RUN poetry config virtualenvs.in-project true && \
+    poetry install --only main
 
 # Switch to the non-privileged user to run the application.
 USER appuser

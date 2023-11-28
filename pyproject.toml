@@ -2,12 +2,13 @@
 name = "bestweather"
 version = "0.1.0"
 description = "App to aid in determining best locations based on weather"
-authors = ["Jack Roten <thejackroten@gmail.com.com>"]
+authors = ["Jack Roten <thejackroten@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
 django = "^4.2.7"
+requests = "^2.31.0"
 
 [build-system]
 requires = ["poetry-core"]
