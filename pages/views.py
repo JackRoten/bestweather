@@ -1,6 +1,7 @@
 # pages/views.py
 from django.views.generic import TemplateView
 import requests
+import json
 
 class HomeView(TemplateView):
     template_name = "pages/home.html"
@@ -16,8 +17,8 @@ def get_weather_data(latitude, longitude):
     meta_url = f"https://api.weather.gov/points/{latitude},{longitude}"
     meta_response = requests.get(url=meta_url, headers=headers)
     location_url = json.loads(meta_response.text)['properties']['forecastGridData']
-    forecast_response = requests.get(url=forecast_url, headers=headers)
-    json_data = forecast_response.json()
+    forecast_response = requests.get(url=location_url, headers=headers)
+    json_data = json.loads(forecast_response.text)
     return json_data
 
 def weather_view(request):
