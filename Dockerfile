@@ -1,46 +1,60 @@
-# Use an official Python runtime as a parent image
-FROM python:3.12-slim
+# syntax=docker/dockerfile:1
 
-# Set environment variables for Python and Poetry
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-ENV POETRY_VERSION=1.7.1
+# Comments are provided throughout this file to help you get started.
+# If you need more help, visit the Dockerfile reference guide at
+# https://docs.docker.com/engine/reference/builder/
 
-# Install system dependencies
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        curl \
-        build-essential \
-        libpq-dev \
-        tini \
-        && rm -rf /var/lib/apt/lists/*
+ARG PYTHON_VERSION=3.12
+FROM python:${PYTHON_VERSION}-slim as base
+
+# Prevents Python from writing pyc files.
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Keeps Python from buffering stdout and stderr to avoid situations where
+# the application crashes without emitting any logs due to buffering.
+ENV PYTHONUNBUFFERED=1
+
+ENV POETRY_VERSION=1.1.11
+ENV POETRY_CACHE="/nonexistent/.cache/pypoetry/virtualenvs"
 
 # Install Poetry
 RUN curl -sSL https://install.python-poetry.org | python -
 
-# Add `poetry` to PATH
-# ENV PATH="${PATH}:${POETRY_VENV}/bin"
-ENV PATH="$HOME/.local/bin:$PATH"
+WORKDIR /app
 
-# Set the working directory in the container
-WORKDIR /bestweather
+RUN ls -l /app
 
 # Copy only the dependencies files to leverage Docker cache
-COPY pyproject.toml poetry.lock /bestweather/
+COPY pyproject.toml poetry.lock /app/
 
-#Upgrade pip
-RUN pip install --upgrade pip setuptools
+# Create a non-privileged user that the app will run under.
+# See https://docs.docker.com/go/dockerfile-user-best-practices/
+ARG UID=10001
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home "/nonexistent" \
+    --shell "/sbin/nologin" \
+    --no-create-home \
+    --uid "${UID}" \
+    appuser
 
-# Install project dependencies
-# RUN poetry --version
-# RUN poetry config --list
-# RUN poetry install
+# Download dependencies as a separate step to take advantage of Docker's caching.
+# Leverage a cache mount to /root/.cache/pip to speed up subsequent builds.
+# Leverage a bind mount to requirements.txt to avoid having to copy them into
+# into this layer.
 
-# Copy the entire project to the container
-COPY . /bestweather
+RUN pip install --upgrade pip setuptools poetry
+RUN poetry config virtualenvs.in-project true && poetry install --only main
 
-# Expose port 8000 for Django development server
+# Switch to the non-privileged user to run the application.
+USER appuser
+
+# Copy the source code into the container.
+COPY . ./
+
+# Expose the port that the application listens on.
 EXPOSE 8000
 
-# Run Django development server
+# Run the application.
 CMD ["poetry", "run", "python", "manage.py", "runserver", "0.0.0.0:8000"]
