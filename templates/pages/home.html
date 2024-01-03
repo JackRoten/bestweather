@@ -1,8 +1,10 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h1>Helllloooooo!</h1>
-  <h2>Weather Forecast for {{ weather_data.city }}</h2>
-  <p>Temperature: {{ weather_data.temperature }}°C</p>
-  <p>Conditions: {{ weather_data.conditions }}</p>
+  <h1>Weather Forecast</h1>
+  <h2>Weather Forecast for:</h2>
+  <p>Variable 1: {{data.var1}}</p>
+  <p>Variable 2: {{data.var2}}</p>
+  <!-- <p>Temperature: {{ weather_data.temperature }}°C</p>
+  <p>Conditions: {{ weather_data.conditions }}</p> -->
 {% endblock content %}
